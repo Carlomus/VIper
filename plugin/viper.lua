@@ -70,9 +70,6 @@ end, {
     end,
 })
 
--- ────────────────────────────────────────────────────────────────
--- 3.  :CondaDeactivate
--- ────────────────────────────────────────────────────────────────
 vim.api.nvim_create_user_command("CondaDeactivate", function()
     local ok, err = pcall(commands.deactivate)
     if not ok then
