@@ -12,17 +12,24 @@ end
 local envs = req("viper.core.envlist") or {}
 local lsp_util = req("viper.lsps.utils") or {}
 local commands = req("viper.core.commands") or {}
-local fset = req("viper.functional.set") or {}
 
 if vim.fn.executable("conda") == 0 then
     notify("VIper: `conda` executable not found in $PATH.", vim.log.levels.WARN)
     return -- stop configuring commands until Conda is available
 end
 
+local function table_to_set(tab)
+    local set = {}
+    for _, v in ipairs(tab) do
+        set[v] = true
+    end
+    return set
+end
+
 -- utility: (re-)fetch envs & create set on demand
 local function fetch_envs()
     local list = envs.get_conda_environments() -- can be async ⇢ returns list
-    return list, fset.table_to_set(list)
+    return list, table_to_set(list)
 end
 
 ---@param args string
@@ -73,7 +80,7 @@ end, {
 vim.api.nvim_create_user_command("CondaDeactivate", function()
     local ok, err = pcall(commands.deactivate)
     if not ok then
-        notify(("conda-nvim: deactivate failed: %s"):format(err), vim.log.levels.ERROR)
+        notify(("VIper: deactivate failed: %s"):format(err), vim.log.levels.ERROR)
         return
     end
     pcall(lsp_util.restart_lsps)

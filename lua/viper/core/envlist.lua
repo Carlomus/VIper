@@ -34,7 +34,7 @@ function M.get_conda_environments()
                 table.insert(conda_envs, env)
             end
         end,
-    }):start()
+    }):sync()
     return conda_envs
 end
 
