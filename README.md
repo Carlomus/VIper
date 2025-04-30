@@ -17,7 +17,7 @@ workflow. All powered by Lua.
 
 [comment]: <> (Include :h nvim-conda)
 
-`nvim-conda` allows you to work with the
+`VIper` allows you to work with the
 [conda](https://docs.conda.io/en/latest/) package manager inside a Neovim
 session. Switch back and forth between conda environments and keep your LSP
 client up to date with a single command. Enjoy a smooth experience across all
@@ -33,7 +33,7 @@ play experience — no additional configurations required.
 
 [comment]: <> (Include :h nvim-conda-requirements)
 
-`nvim-conda` leverages the user's shell to perform the core conda procedures.
+`VIper` leverages the user's shell to perform the core conda procedures.
 The required programs and dependencies are:
 
 - Neovim `>= 0.9.0`
@@ -54,14 +54,14 @@ Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
 Plug "nvim-lua/plenary.nvim"
-Plug "kmontocam/nvim-conda"
+Plug "carlomus/nvim-conda"
 ```
 
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use ({
-    "kmontocam/nvim-conda",
+    "carlomus/nvim-conda",
     requires = { "nvim-lua/plenary.nvim" },
 })
 ```
@@ -70,7 +70,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 return {
-	"kmontocam/nvim-conda",
+	"carlomus/nvim-conda",
 	dependencies = { "nvim-lua/plenary.nvim" },
     }
 ```
