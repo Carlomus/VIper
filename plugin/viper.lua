@@ -2,7 +2,7 @@ local notify = vim.notify
 
 local function req(mod)
     local ok, lib = pcall(require, mod)
-    if not ok then
+    if not ok or lib == {} then
         notify(("VIper: cannot load %s; %s"):format(mod, lib), vim.log.levels.ERROR)
         return nil
     end
@@ -18,21 +18,10 @@ if vim.fn.executable("conda") == 0 then
     return -- stop configuring commands until Conda is available
 end
 
-local function table_to_set(tab)
-    local set = {}
-    for _, v in ipairs(tab) do
-        set[v] = true
-    end
-    return set
-end
+local env_list = envs[1]
+local env_set = envs[2]
 
--- utility: (re-)fetch envs & create set on demand
-local function fetch_envs()
-    local list = envs.get_conda_environments() -- can be async ⇢ returns list
-    return list, table_to_set(list)
-end
-
-local function run_and_source(cmd_string)
+local function run(cmd_string)
     local lines = vim.fn.systemlist(cmd_string)
     local exit = vim.v.shell_error -- 0 == success
 
@@ -41,7 +30,7 @@ local function run_and_source(cmd_string)
     end
 
     local script = table.concat(lines, "\n")
-    local ok, exec_err = pcall(vim.api.nvim_exec, script, false) -- false = not-lua
+    local ok, exec_err = pcall(vim.api.nvim_exec2, script, { output = false })
 
     if not ok then
         return false, exec_err
@@ -51,7 +40,6 @@ end
 
 ---@param args string
 local function conda_activate(args)
-    local env_list, env_set = fetch_envs()
     local name = (args ~= "" and args) or nil
 
     if name then
@@ -66,7 +54,7 @@ local function conda_activate(args)
             return
         end
 
-        local ok, run_err = run_and_source(cmd)
+        local ok, run_err = run(cmd)
         if not ok then
             notify(("VIper: activate failed: %s"):format(run_err), vim.log.levels.ERROR)
             return
@@ -91,7 +79,6 @@ end, {
     desc = "conda activate <env>.  Without <env>, open an interactive picker.",
     nargs = "?",
     complete = function(arg_lead)
-        local env_list = fetch_envs() -- fresh list each completion
         local matches = {}
         for _, env in ipairs(env_list) do
             if env:find("^" .. vim.pesc(arg_lead)) then
@@ -109,7 +96,7 @@ vim.api.nvim_create_user_command("CondaDeactivate", function()
         return
     end
 
-    local ok, run_err = run_and_source(cmd)
+    local ok, run_err = run(cmd)
     if not ok then
         notify(("VIper: deactivate failed: %s"):format(run_err), vim.log.levels.ERROR)
         return

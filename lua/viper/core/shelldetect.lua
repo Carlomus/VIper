@@ -22,7 +22,7 @@ local function get_shell_type(shell_implement)
         cmd_exe = "cmd_exe",
         fish = "fish",
         powershell = "powershell",
-        pwsh = "powershell", -- if client is using powershell in Unix
+        pwsh = "powershell",
     }
 
     return possible_shell_types[shell_implement] or "unknown"
@@ -33,6 +33,7 @@ local shell_type = get_shell_type(shell_implement)
 
 if shell_type == "unknown" then
     vim.notify("Cannot identify shell! Implementation is " .. shell_implement)
+    return {}
 end
 
 local M = {

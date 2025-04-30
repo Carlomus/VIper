@@ -1,4 +1,8 @@
 local ok, shell_info = pcall(require, "viper.core.shelldetect")
+if not ok then
+    vim.notify("shelldetect not available")
+    return {}
+end
 
 local M = {}
 

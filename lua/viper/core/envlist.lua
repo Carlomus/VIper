@@ -1,5 +1,13 @@
 local Job = require("plenary.job")
 
+local function table_to_set(tab)
+    local set = {}
+    for _, v in ipairs(tab) do
+        set[v] = true
+    end
+    return set
+end
+
 ---@param matches table, table to store matches
 ---@param tab table, table containing elements to search, can be nested
 ---@param pattern string, regex parttern to match strings on table
@@ -16,9 +24,9 @@ local function table_regex_match(matches, tab, pattern)
     return matches
 end
 
-local M = {}
 ---@return table
-function M.get_conda_environments()
+---@return table
+function get_conda_environments()
     local shell_output = {}
     local conda_envs = {}
     Job:new({
@@ -35,7 +43,12 @@ function M.get_conda_environments()
             end
         end,
     }):sync()
-    return conda_envs
+    return conda_envs, table_to_set(conda_envs)
 end
 
-return M
+local env_list, env_set = get_conda_environments()
+
+return {
+    env_list,
+    env_set,
+}
