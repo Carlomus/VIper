@@ -107,3 +107,15 @@ end, {
     desc = "conda deactivate (stop environment) inside this Neovim session.",
     nargs = 0
 })
+
+vim.api.nvim_create_user_command("CondaWhich", function()
+    local env = vim.env.CONDA_DEFAULT_ENV
+    local python = vim.fn.trim(vim.fn.system("python -c 'import sys;print(sys.executable)'"))
+    if not env then
+        print(("No Conda environment active.\nPython exe : %s"):format(python))
+        return
+    end
+    print(("Active env: %s\nPython exe : %s"):format(env, python))
+end, {
+    desc = "Show the currently-active Conda environment and python path"
+})

@@ -4,13 +4,20 @@ local M = {}
 
 ---Show a centred list of environments; call `cb(choice)` on <CR>.
 ---@param envs string[]
+---@param active string
 ---@param cb   fun(choice:string)|nil
-function M.select_env(envs, cb)
-    local height = math.min(#envs + 2, 15)
-    local width = 32
-    local border = {"─", "│", "─", "│", "╭", "╮", "╯", "╰"}
+function M.select_env(envs, active, cb)
+    local lines = {}
+    for i, name in ipairs(envs) do
+        lines[i] = (name == active) and (" " .. name .. "  (active)") -- checked icon
+            or (" " .. name) -- bullet icon
+    end
 
-    local win_id, win = popup.create(envs, {
+    local height = math.min(#lines + 2, 15)
+    local width = 32
+    local border = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+
+    local win_id, win = popup.create(lines, {
         title = "Conda environments",
         highlight = "Normal",
         relative = "editor",
@@ -18,25 +25,25 @@ function M.select_env(envs, cb)
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
         minheight = height,
-        borderchars = border
+        borderchars = border,
     })
     local buf = vim.api.nvim_win_get_buf(win_id)
 
     -- modern option setters (0.10+)
     vim.api.nvim_set_option_value("number", false, {
-        win = win_id
+        win = win_id,
     })
     vim.api.nvim_set_option_value("wrap", false, {
-        win = win_id
+        win = win_id,
     })
     vim.api.nvim_set_option_value("winhl", "Normal:Normal", {
-        win = win.border.win_id
+        win = win.border.win_id,
     })
     vim.api.nvim_set_option_value("modifiable", false, {
-        buf = buf
+        buf = buf,
     })
     vim.api.nvim_set_option_value("bufhidden", "wipe", {
-        buf = buf
+        buf = buf,
     })
 
     local function close()
@@ -44,8 +51,8 @@ function M.select_env(envs, cb)
     end
 
     local function choose()
-        local l = vim.api.nvim_win_get_cursor(win_id)[1] -- 1-based
-        local text = vim.api.nvim_buf_get_lines(buf, l - 1, l, false)[1]
+        local row = vim.api.nvim_win_get_cursor(win_id)[1]
+        local text = envs[row] -- no icons, exact name
         close()
         if text and cb then
             cb(text)
@@ -54,19 +61,19 @@ function M.select_env(envs, cb)
 
     vim.keymap.set("n", "<Esc>", close, {
         buffer = buf,
-        nowait = true
+        nowait = true,
     })
     vim.keymap.set("n", "q", close, {
         buffer = buf,
-        nowait = true
+        nowait = true,
     })
     vim.keymap.set("n", "<CR>", choose, {
         buffer = buf,
-        nowait = true
+        nowait = true,
     })
 
     local aug = vim.api.nvim_create_augroup("ViperEnvWindow", {
-        clear = true
+        clear = true,
     })
 
     -- close on buffer leave
@@ -74,7 +81,7 @@ function M.select_env(envs, cb)
         group = aug,
         buffer = buf,
         once = true,
-        callback = close
+        callback = close,
     })
 
     -- recreate on window resize
@@ -85,7 +92,7 @@ function M.select_env(envs, cb)
                 close()
                 M.select_env(envs, cb)
             end
-        end
+        end,
     })
 end
 
