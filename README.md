@@ -1,4 +1,4 @@
-# nvim-conda
+# VIper
 
 Conda manager for Neovim: seamlessly activate environments and enhance your
 workflow. All powered by Lua.
@@ -15,7 +15,7 @@ workflow. All powered by Lua.
 
 ## Introduction
 
-[comment]: <> (Include :h nvim-conda)
+[comment]: <> (Include :h VIper)
 
 `VIper` allows you to work with the
 [conda](https://docs.conda.io/en/latest/) package manager inside a Neovim
@@ -54,14 +54,14 @@ Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
 Plug "nvim-lua/plenary.nvim"
-Plug "carlomus/nvim-conda"
+Plug "carlomus/VIper"
 ```
 
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use ({
-    "carlomus/nvim-conda",
+    "carlomus/VIper",
     requires = { "nvim-lua/plenary.nvim" },
 })
 ```
@@ -70,7 +70,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 return {
-	"carlomus/nvim-conda",
+	"carlomus/VIper",
 	dependencies = { "nvim-lua/plenary.nvim" },
     }
 ```
@@ -80,15 +80,12 @@ return {
 
 ## Commands
 
-[comment]: <> (Include :h nvim-conda-commands)
+[comment]: <> (Include :h VIper-commands)
 [comment]: <> (Include `:CondaActivate`)
 
 - `:CondaActivate` - lists conda environments in menu and activates selected
 - `:CondaActivate <env_name>` - activates the given conda environment
 - `:CondaDeactivate` - deactivates the active conda environment
+- `:CondaWhich` - prints the active conda environment and the python path
 
-## Contributing
-
-The project is currently in a beta stage. It would be greatly appreciated to
-receive feedback, suggestions and assistance in implementing additional
-features, documentation and making necessary fixes.
+The project is a fork (with some minor tweaks) of the nvim-conda repo from kmontocam.
