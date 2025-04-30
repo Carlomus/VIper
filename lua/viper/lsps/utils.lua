@@ -1,7 +1,7 @@
 local M = {}
 
 ---@return string? # lsp client name
-local function get_active_lsp_client()
+function M.get_active_lsp_client()
     local lspconfig_status, _ = pcall(require, "lspconfig")
     if lspconfig_status then
         return "lspconfig"
@@ -11,10 +11,10 @@ local function get_active_lsp_client()
 end
 
 ---@return nil
-M.restart_lsps = function()
+function M.restart_lsps()
     local lsp_client = M.get_active_lsp_client()
     if lsp_client == "lspconfig" then
-        require("conda.lsps.lspconfig"):restart_lsps()
+        require("viper.lsps.lspconfig"):restart_lsps()
     else
         return nil
     end

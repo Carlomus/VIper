@@ -12,6 +12,7 @@ end
 local envs = req("viper.core.envlist") or {}
 local lsp_util = req("viper.lsps.utils") or {}
 local commands = req("viper.core.commands") or {}
+local ui_window = req("viper.ui.window") or {}
 
 if vim.fn.executable("conda") == 0 then
     notify("VIper: `conda` executable not found in $PATH.", vim.log.levels.WARN)
@@ -30,7 +31,9 @@ local function run(cmd_string)
     end
 
     local script = table.concat(lines, "\n")
-    local ok, exec_err = pcall(vim.api.nvim_exec2, script, { output = false })
+    local ok, exec_err = pcall(vim.api.nvim_exec2, script, {
+        output = false
+    })
 
     if not ok then
         return false, exec_err
@@ -62,13 +65,10 @@ local function conda_activate(args)
         pcall(lsp_util.restart_lsps)
         notify("Activated environment: " .. name)
     else
-        -- no argument → let the user pick interactively
-        vim.ui.select(env_list, { prompt = "Activate Conda environment" }, function(choice)
-            if not choice then
-                notify("VIper: No environment selected!")
-                return
+        ui_window.select_env(env_list, vim.env.CONDA_DEFAULT_ENV or "", function(choice)
+            if choice then
+                conda_activate(choice)
             end
-            conda_activate(choice) -- tail-call with chosen env
         end)
     end
 end
@@ -86,7 +86,7 @@ end, {
             end
         end
         return matches
-    end,
+    end
 })
 
 vim.api.nvim_create_user_command("CondaDeactivate", function()
@@ -105,5 +105,5 @@ vim.api.nvim_create_user_command("CondaDeactivate", function()
     notify("Deactivated environment")
 end, {
     desc = "conda deactivate (stop environment) inside this Neovim session.",
-    nargs = 0,
+    nargs = 0
 })

@@ -16,9 +16,8 @@ local function table_regex_match(matches, tab, pattern)
     for _, v in pairs(tab) do
         if type(v) == "table" then
             table_regex_match(matches, v, pattern)
-        elseif string.match(v, pattern) then
-            local match = string.match(v, pattern)
-            table.insert(matches, match)
+        elseif v:match(pattern) then
+            table.insert(matches, v:match(pattern))
         end
     end
     return matches
@@ -26,12 +25,12 @@ end
 
 ---@return table
 ---@return table
-function get_conda_environments()
+local function get_conda_environments()
     local shell_output = {}
     local conda_envs = {}
     Job:new({
         command = "conda",
-        args = { "env", "list" },
+        args = {"env", "list"},
         on_stdout = function(_, stdout)
             table.insert(shell_output, stdout)
         end,
@@ -41,14 +40,11 @@ function get_conda_environments()
             for _, env in ipairs(_conda_envs) do
                 table.insert(conda_envs, env)
             end
-        end,
+        end
     }):sync()
     return conda_envs, table_to_set(conda_envs)
 end
 
 local env_list, env_set = get_conda_environments()
 
-return {
-    env_list,
-    env_set,
-}
+return {env_list, env_set}
