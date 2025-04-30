@@ -31,6 +31,10 @@ end
 local shell_implement = get_running_shell_implementation()
 local shell_type = get_shell_type(shell_implement)
 
+if shell_type == "unknown" then
+    vim.notify("Cannot identify shell! Implementation is " .. shell_implement)
+end
+
 local M = {
     shell_implement = shell_implement,
     shell_type = shell_type,

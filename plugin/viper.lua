@@ -32,6 +32,23 @@ local function fetch_envs()
     return list, table_to_set(list)
 end
 
+local function run_and_source(cmd_string)
+    local lines = vim.fn.systemlist(cmd_string)
+    local exit = vim.v.shell_error -- 0 == success
+
+    if exit ~= 0 then
+        return false, ("shell returned exit-code %d\n%s"):format(exit, table.concat(lines, "\n"))
+    end
+
+    local script = table.concat(lines, "\n")
+    local ok, exec_err = pcall(vim.api.nvim_exec, script, false) -- false = not-lua
+
+    if not ok then
+        return false, exec_err
+    end
+    return true
+end
+
 ---@param args string
 local function conda_activate(args)
     local env_list, env_set = fetch_envs()
@@ -43,16 +60,24 @@ local function conda_activate(args)
             return
         end
 
-        local ok, err = pcall(commands.activate, name)
+        local cmd = commands.get_shell_cmds("activate", name)
+        if not cmd then -- `nil, <why>` came back
+            notify("VIper: could not obtain command", vim.log.levels.ERROR)
+            return
+        end
+
+        local ok, run_err = run_and_source(cmd)
         if not ok then
-            notify(("VIper: activate failed: %s"):format(err), vim.log.levels.ERROR)
+            notify(("VIper: activate failed: %s"):format(run_err), vim.log.levels.ERROR)
             return
         end
         pcall(lsp_util.restart_lsps)
+        notify("Activated environment: " .. name)
     else
         -- no argument → let the user pick interactively
         vim.ui.select(env_list, { prompt = "Activate Conda environment" }, function(choice)
             if not choice then
+                notify("VIper: No environment selected!")
                 return
             end
             conda_activate(choice) -- tail-call with chosen env
@@ -78,12 +103,19 @@ end, {
 })
 
 vim.api.nvim_create_user_command("CondaDeactivate", function()
-    local ok, err = pcall(commands.deactivate)
+    local cmd = commands.get_shell_cmds("deactivate")
+    if not cmd then
+        notify("VIper: could not deactivate", vim.log.levels.ERROR)
+        return
+    end
+
+    local ok, run_err = run_and_source(cmd)
     if not ok then
-        notify(("VIper: deactivate failed: %s"):format(err), vim.log.levels.ERROR)
+        notify(("VIper: deactivate failed: %s"):format(run_err), vim.log.levels.ERROR)
         return
     end
     pcall(lsp_util.restart_lsps)
+    notify("Deactivated environment")
 end, {
     desc = "conda deactivate (stop environment) inside this Neovim session.",
     nargs = 0,

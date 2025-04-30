@@ -1,7 +1,5 @@
 local ok, shell_info = pcall(require, "viper.core.shelldetect")
 
-local shell_type = shell_info.shell_type
-
 local M = {}
 
 ---@param subcommand string, modify conda function
@@ -10,6 +8,9 @@ function M.get_shell_cmds(subcommand, env_name)
     if env_name == nil then
         env_name = ""
     end
+
+    local shell_type = shell_info.shell_type
+    local shell_implement = shell_info.shell_implement
 
     local valid = { activate = true, deactivate = true }
     if not valid[subcommand] then
@@ -20,7 +21,7 @@ function M.get_shell_cmds(subcommand, env_name)
         posix = {
             activate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ activate ]]
                 .. env_name
                 .. [[ | sed -e 's/export \([^=]*\)=\(.*\)/let \$\1=\2/g']]
@@ -28,7 +29,7 @@ function M.get_shell_cmds(subcommand, env_name)
             ),
             deactivate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ deactivate]]
                 .. [[ | sed -e 's/export \([^=]*\)=\(.*\)/let \$\1=\2/g']]
                 .. " -e 's/^\\([^[:space:]]*\\)=\\(.*\\)/let \\1=\\2/g'"
@@ -38,7 +39,7 @@ function M.get_shell_cmds(subcommand, env_name)
         csh = {
             activate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ activate ]]
                 .. env_name
                 .. " | sed -e 's/setenv \\([^[:space:]]*\\) \\(.*\\);/let \\$\\1=\\2/g'"
@@ -46,7 +47,7 @@ function M.get_shell_cmds(subcommand, env_name)
             ),
             deactivate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ deactivate]]
                 .. " | sed -e 's/setenv \\([^[:space:]]*\\) \\(.*\\);/let \\$\\1=\\2/g'"
                 .. [[ -e 's/set \([^=]*\)=\(.*\);/let \1=\2/g']]
@@ -56,14 +57,14 @@ function M.get_shell_cmds(subcommand, env_name)
         xonsh = {
             activate = (
                 "conda shell."
-                .. shell_type
+                .. shell_implement
                 .. " activate "
                 .. env_name
                 .. " | sed -e 's/^/let /g'"
             ),
             deactivate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ deactivate]]
                 .. [[ | sed -e 's/del/unlet/g']]
                 .. [[ -e 's/\\([^=]*\\) = \\(.*\\)/let \\1 = \\2/g']]
@@ -89,7 +90,7 @@ function M.get_shell_cmds(subcommand, env_name)
         fish = {
             activate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ activate ]]
                 .. env_name
                 .. " | sed -e 's/set -gx \\([^[:space:]]*\\) \\(.*\\);/let \\$\\1=\\2/g'"
@@ -97,7 +98,7 @@ function M.get_shell_cmds(subcommand, env_name)
             ),
             deactivate = (
                 [[conda shell.]]
-                .. shell_type
+                .. shell_implement
                 .. [[ deactivate]]
                 .. " | sed -e 's/set -gx \\([^[:space:]]*\\) \\(.*\\);/let \\$\\1=\\2/g'"
                 .. " -e 's/set -e \\([^[:space:]]*\\);/unlet \\$\\1/g'"
