@@ -72,6 +72,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 return {
 	"carlomus/VIper",
 	dependencies = { "nvim-lua/plenary.nvim" },
+ 	ft   = { "python", "ipynb" }
     }
 ```
 
